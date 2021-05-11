@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Icon, TextField, Autocomplete } from "@shopify/polaris";
 import { SearchMinor } from "@shopify/polaris-icons";
+import axios from "axios";
 
 // import SearchResults from "./SearchResults/index";
 // import NominationList from "./SearchForm/NominationList/index";
@@ -13,13 +14,11 @@ export default function SearchForm() {
     { value: "vintage", label: "Vintage" },
     { value: "refurbished", label: "Refurbished" },
   ];
-
-  //  const currentValue = setInputValue(target.)
-
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [options, setOptions] = useState("");
+  const [options, setOptions] = useState(deselectedOptions);
   const [loading, setLoading] = useState(false);
+  const [movieList, setMovieList] = useState([]);
 
   const updateText = useCallback(
     (value) => {
@@ -43,7 +42,7 @@ export default function SearchForm() {
         setLoading(false);
       }, 300);
     },
-    [options, loading]
+    [deselectedOptions, options, loading]
   );
 
   const updateSelection = useCallback(
@@ -60,13 +59,20 @@ export default function SearchForm() {
     [options]
   );
 
+  function searchAPI() {
+    const searchURL = "http://localhost:3001/api/search";
+    axios.post(searchURL, { search: inputValue }).then(function (response) {
+      setMovieList(response.data);
+    });
+  }
+
   const textField = (
     <Autocomplete.TextField
       onChange={updateText}
-      label=""
+      label="Tags"
       value={inputValue}
       prefix={<Icon source={SearchMinor} color="base" />}
-      placeholder="Start typing to find movies"
+      placeholder="Search"
     />
   );
 
@@ -78,8 +84,13 @@ export default function SearchForm() {
         onSelect={updateSelection}
         loading={loading}
         textField={textField}
-        name="movieLookup"
       />
+      <button onClick={searchAPI}>Test Search</button>
+      <ul>
+        {movieList.map((movie) => {
+          return <li key={movie.imdbID}>{movie.Title}</li>;
+        })}
+      </ul>
     </div>
   );
 }
