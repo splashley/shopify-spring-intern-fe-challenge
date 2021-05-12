@@ -21,16 +21,19 @@ app.use(bodyParser.json());
 
 //Functions
 
+/* LOOK AT THIS AFTER
+you could do something like `.then(responseArray => {responseArray.forEach(data){make the second API call here to `t` and add the OMDB ID }).then(res => this second API call will have all the specific details about each movie)`*/
+
 // Endpoints
 app.post("/api/search", (req, res) => {
   let apiKey = process.env.OMDB_API_KEY;
-  let apiURL = `http://www.omdbapi.com/?apikey=${apiKey}&s=${req.body.search}`;
+  let apiURL = `http://www.omdbapi.com/?apikey=${apiKey}&s=${req.body.search}&type=movie`;
   axios
     .get(apiURL)
     .then((data) => {
+      console.log(data);
       let returnData = data.data.Search;
       res.json(returnData);
-      console.log("here we're sending json w/ the data");
     })
     .catch((err) => console.log("err", err));
 });

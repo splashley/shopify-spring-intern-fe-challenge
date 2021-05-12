@@ -19,6 +19,8 @@ export default function SearchForm() {
   const [options, setOptions] = useState(deselectedOptions);
   const [loading, setLoading] = useState(false);
   const [movieList, setMovieList] = useState([]);
+  const [nominatedMovieList, setNominatedMovieList] = useState([]);
+  const [disableButton, setDisableButton] = useState(false);
 
   const updateText = useCallback(
     (value) => {
@@ -62,8 +64,19 @@ export default function SearchForm() {
   function searchAPI() {
     const searchURL = "http://localhost:3001/api/search";
     axios.post(searchURL, { search: inputValue }).then(function (response) {
+      console.log(response);
       setMovieList(response.data);
     });
+  }
+
+  function addNomination(movie) {
+    setNominatedMovieList([
+      ...nominatedMovieList,
+      { title: movie.Title, year: movie.Year, imdbID: movie.imdbID },
+    ]);
+    setDisableButton(true);
+    /* one way is to create a state which is an array. in that array, you pass in an identifier i.e. an id. in the button[disabled], you can check if that id is in the list */
+    console.log(nominatedMovieList);
   }
 
   const textField = (
@@ -88,9 +101,33 @@ export default function SearchForm() {
       <button onClick={searchAPI}>Test Search</button>
       <ul>
         {movieList.map((movie) => {
-          return <li key={movie.imdbID}>{movie.Title}</li>;
+          return (
+            <li key={movie.imdbID}>
+              {movie.Title}
+              {movie.Year}
+              <button
+                onClick={() => addNomination(movie)}
+                disabled={disableButton}
+              >
+                Nominate
+              </button>
+            </li>
+          );
         })}
       </ul>
+      <div>
+        <ul>
+          {nominatedMovieList.map((movie) => {
+            console.log(movie + "test");
+            return (
+              <li key={movie.imdbID}>
+                {movie.Title}
+                {movie.Year}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }
