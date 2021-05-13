@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Icon, TextField, Autocomplete } from "@shopify/polaris";
 import { SearchMinor } from "@shopify/polaris-icons";
 import axios from "axios";
@@ -64,19 +64,28 @@ export default function SearchForm() {
   function searchAPI() {
     const searchURL = "http://localhost:3001/api/search";
     axios.post(searchURL, { search: inputValue }).then(function (response) {
-      console.log(response);
-      setMovieList(response.data);
+      setMovieList(
+        response.data.map((value) => ({ ...value, isNominated: false }))
+      );
+      console.log(movieList);
     });
   }
 
-  function addNomination(movie) {
-    setNominatedMovieList([
-      ...nominatedMovieList,
-      { title: movie.Title, year: movie.Year, imdbID: movie.imdbID },
-    ]);
-    setDisableButton(true);
-    /* one way is to create a state which is an array. in that array, you pass in an identifier i.e. an id. in the button[disabled], you can check if that id is in the list */
-    console.log(nominatedMovieList);
+  function updateNomination(movie) {
+    setMovieList(
+      movieList.map((movieDetails) => {
+        if (movieDetails.imdbID === movie.imdbID) {
+          if (movie.isNominated == true) {
+            return { ...movieDetails, isNominated: false };
+          } else {
+            return { ...movieDetails, isNominated: true };
+          }
+        } else {
+          return movieDetails;
+        }
+      })
+    );
+    console.log(movieList);
   }
 
   const textField = (
@@ -106,8 +115,8 @@ export default function SearchForm() {
               {movie.Title}
               {movie.Year}
               <button
-                onClick={() => addNomination(movie)}
-                disabled={disableButton}
+                onClick={() => updateNomination(movie)}
+                disabled={movie.isNominated}
               >
                 Nominate
               </button>
@@ -125,6 +134,26 @@ export default function SearchForm() {
                 {movie.Year}
               </li>
             );
+          })}
+        </ul>
+      </div>
+      <div>
+        <h2>Nominated Films</h2>
+        <ul>
+          {movieList.map((movie) => {
+            if (movie.isNominated == true) {
+              return (
+                <>
+                  <li key={movie.imdbID}>
+                    {movie.Title}
+                    {movie.Year}
+                  </li>
+                  <button onClick={() => updateNomination(movie)}>
+                    Unnominate
+                  </button>
+                </>
+              );
+            }
           })}
         </ul>
       </div>
