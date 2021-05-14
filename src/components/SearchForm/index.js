@@ -20,7 +20,6 @@ export default function SearchForm() {
   const [loading, setLoading] = useState(false);
   const [movieList, setMovieList] = useState([]);
   const [nominatedMovieList, setNominatedMovieList] = useState([]);
-  const [disableButton, setDisableButton] = useState(false);
 
   const updateText = useCallback(
     (value) => {
@@ -64,29 +63,47 @@ export default function SearchForm() {
   function searchAPI() {
     const searchURL = "http://localhost:3001/api/search";
     axios.post(searchURL, { search: inputValue }).then(function (response) {
-      setMovieList(
-        response.data.map((value) => ({ ...value, isNominated: false }))
-      );
-      console.log(movieList);
+      setMovieList(response.data);
+      // , isNominated: false
+      // .map((value) => ({ ...value}))console.log(movieList);
     });
   }
 
-  function updateNomination(movie) {
-    setMovieList(
-      movieList.map((movieDetails) => {
-        if (movieDetails.imdbID === movie.imdbID) {
-          if (movie.isNominated == true) {
-            return { ...movieDetails, isNominated: false };
-          } else {
-            return { ...movieDetails, isNominated: true };
-          }
-        } else {
-          return movieDetails;
-        }
-      })
-    );
-    console.log(movieList);
+  //   function updateNomination(movie) {
+  //      movieList.map((movieDetails)
+  //  => {
+
+  //  }     );
+  //     // check to see if the movie selected is nominated or not
+  //     // if the movie is not nominated, it needs to be added to the nominatedMovieList
+  //     //  - we need to get existing moviedata from movieList
+  //     //  - we need to include the title, year, imdbID and a unique identifier
+  //     // if the movie is nominated, it needs to be removed from the nominatedMovieList
+
+  //     // setMovieList(
+  //     //   movieList.map((movieDetails) => {
+  //     //     if (movieDetails.imdbID === movie.imdbID) {
+  //     //       if (movie.isNominated == true) {
+  //     //         return { ...movieDetails, isNominated: false };
+  //     //       } else {
+  //     //         return { ...movieDetails, isNominated: true };
+  //     //       }
+  //     //     } else {
+  //     //       return movieDetails;
+  //     //     }
+  //     //   })
+  //     // );
+  //     console.log(movieList);
+  //   }
+
+  function addNomination(movie) {
+    // get movie details, add them to nominatedMovieList, including isNominated property
+    nominatedMovieList.push({ movie, isNominated: true });
+    setNominatedMovieList([...nominatedMovieList]);
+    console.log(nominatedMovieList);
   }
+
+  function removeNomination() {}
 
   const textField = (
     <Autocomplete.TextField
@@ -115,7 +132,7 @@ export default function SearchForm() {
               {movie.Title}
               {movie.Year}
               <button
-                onClick={() => updateNomination(movie)}
+                onClick={() => addNomination(movie)}
                 disabled={movie.isNominated}
               >
                 Nominate
@@ -125,35 +142,23 @@ export default function SearchForm() {
         })}
       </ul>
       <div>
-        <ul>
-          {nominatedMovieList.map((movie) => {
-            console.log(movie + "test");
-            return (
-              <li key={movie.imdbID}>
-                {movie.Title}
-                {movie.Year}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <div>
         <h2>Nominated Films</h2>
         <ul>
-          {movieList.map((movie) => {
-            if (movie.isNominated == true) {
-              return (
-                <>
-                  <li key={movie.imdbID}>
-                    {movie.Title}
-                    {movie.Year}
-                  </li>
-                  <button onClick={() => updateNomination(movie)}>
-                    Unnominate
-                  </button>
-                </>
-              );
-            }
+          {nominatedMovieList.map((movie) => {
+            return (
+              <>
+                <li key={movie.imdbID}>
+                  {movie.Title}
+                  {movie.Year}
+                </li>
+                <button
+                  onClick={() => removeNomination(movie)}
+                  key={movie.imdbID}
+                >
+                  Unnominate
+                </button>
+              </>
+            );
           })}
         </ul>
       </div>
