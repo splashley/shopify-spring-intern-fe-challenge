@@ -1,9 +1,10 @@
 import React from "react";
+import { DisplayText } from "@shopify/polaris";
 
 export default function Header() {
   return (
     <div>
-      <h1>Pick Your Nominations</h1>
+      <DisplayText size="large">Search For Nominations</DisplayText>
     </div>
   );
 }

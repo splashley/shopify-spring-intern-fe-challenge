@@ -1,5 +1,12 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { Icon, TextField, Autocomplete } from "@shopify/polaris";
+import React, { useState, useCallback } from "react";
+import {
+  Icon,
+  TextField,
+  Autocomplete,
+  Card,
+  List,
+  Layout,
+} from "@shopify/polaris";
 import { SearchMinor } from "@shopify/polaris-icons";
 import axios from "axios";
 
@@ -64,46 +71,45 @@ export default function SearchForm() {
     const searchURL = "http://localhost:3001/api/search";
     axios.post(searchURL, { search: inputValue }).then(function (response) {
       setMovieList(response.data);
-      // , isNominated: false
-      // .map((value) => ({ ...value}))console.log(movieList);
     });
   }
 
-  //   function updateNomination(movie) {
-  //      movieList.map((movieDetails)
-  //  => {
-
-  //  }     );
-  //     // check to see if the movie selected is nominated or not
-  //     // if the movie is not nominated, it needs to be added to the nominatedMovieList
-  //     //  - we need to get existing moviedata from movieList
-  //     //  - we need to include the title, year, imdbID and a unique identifier
-  //     // if the movie is nominated, it needs to be removed from the nominatedMovieList
-
-  //     // setMovieList(
-  //     //   movieList.map((movieDetails) => {
-  //     //     if (movieDetails.imdbID === movie.imdbID) {
-  //     //       if (movie.isNominated == true) {
-  //     //         return { ...movieDetails, isNominated: false };
-  //     //       } else {
-  //     //         return { ...movieDetails, isNominated: true };
-  //     //       }
-  //     //     } else {
-  //     //       return movieDetails;
-  //     //     }
-  //     //   })
-  //     // );
-  //     console.log(movieList);
-  //   }
-
   function addNomination(movie) {
     // get movie details, add them to nominatedMovieList, including isNominated property
-    nominatedMovieList.push({ movie, isNominated: true });
-    setNominatedMovieList([...nominatedMovieList]);
+    if (nominatedMovieList.length === 10) {
+      alert("You've reach the limit of nominations");
+    } else {
+      let i = 0;
+      for (i = 0; i < 1; i++) {
+        nominatedMovieList.push({
+          movie,
+          isNominated: true,
+          key: nominatedMovieList.length,
+        });
+        setNominatedMovieList([...nominatedMovieList]);
+      }
+    }
     console.log(nominatedMovieList);
   }
 
-  function removeNomination() {}
+  function removeNomination(movieDetails) {
+    // take moviedetails.movie.key, find same info in nominatedMovieList, remove object all together
+    let i = 0;
+    let newList;
+    for (i = 0; i < nominatedMovieList.length; i++) {
+      // Button clicked matches list being iterated
+      if (movieDetails.key === nominatedMovieList[i].key) {
+        //Copy to new array to not modify the existing arrray while looping /shrugs don't know if real issue
+        newList = nominatedMovieList;
+        //remove the element the loop is on and only just that element
+        newList.splice(i, 1);
+        //List should be unique; We know to not search for any others.
+        break;
+      }
+    }
+    //Update state with newList which has the movie removed
+    setNominatedMovieList([...newList]);
+  }
 
   const textField = (
     <Autocomplete.TextField
@@ -116,7 +122,7 @@ export default function SearchForm() {
   );
 
   return (
-    <div style={{ height: "225px" }}>
+    <div>
       <Autocomplete
         options={options}
         selected={selectedOptions}
@@ -125,43 +131,47 @@ export default function SearchForm() {
         textField={textField}
       />
       <button onClick={searchAPI}>Test Search</button>
-      <ul>
-        {movieList.map((movie) => {
-          return (
-            <li key={movie.imdbID}>
-              {movie.Title}
-              {movie.Year}
-              <button
-                onClick={() => addNomination(movie)}
-                disabled={movie.isNominated}
-              >
-                Nominate
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <div>
-        <h2>Nominated Films</h2>
-        <ul>
-          {nominatedMovieList.map((movie) => {
-            return (
-              <>
-                <li key={movie.imdbID}>
-                  {movie.Title}
-                  {movie.Year}
-                </li>
-                <button
-                  onClick={() => removeNomination(movie)}
-                  key={movie.imdbID}
-                >
-                  Unnominate
-                </button>
-              </>
-            );
-          })}
-        </ul>
-      </div>
+      <Layout>
+        <Layout.Section>
+          <Card title="Movie Results" sectioned>
+            <List>
+              {movieList.map((movie) => {
+                return (
+                  <List.Item key={movie.imdbID}>
+                    {movie.Title}
+                    {movie.Year}
+                    <button
+                      onClick={() => addNomination(movie)}
+                      disabled={movie.isNominated}
+                    >
+                      Nominate
+                    </button>
+                  </List.Item>
+                );
+              })}
+            </List>
+          </Card>
+        </Layout.Section>
+        <Layout.Section secondary>
+          <Card title="Nominated Films" sectioned>
+            <List>
+              {nominatedMovieList.map((movieDetails) => {
+                return (
+                  <>
+                    <List.Item key={movieDetails.movie.key}>
+                      {movieDetails.movie.Title}
+                      {movieDetails.movie.Year}
+                    </List.Item>
+                    <button onClick={() => removeNomination(movieDetails)}>
+                      Unnominate
+                    </button>
+                  </>
+                );
+              })}
+            </List>
+          </Card>
+        </Layout.Section>
+      </Layout>
     </div>
   );
 }
