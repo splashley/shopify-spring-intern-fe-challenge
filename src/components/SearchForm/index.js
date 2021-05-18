@@ -6,12 +6,32 @@ import {
   Card,
   List,
   Layout,
+  Button,
 } from "@shopify/polaris";
 import { SearchMinor } from "@shopify/polaris-icons";
 import axios from "axios";
+import styled from "styled-components";
 
 // import SearchResults from "./SearchResults/index";
 // import NominationList from "./SearchForm/NominationList/index";
+
+// CSS
+const SearchBar = styled.div`
+  display: flex;
+  margin-top: 4px;
+  margin-bottom: 16px;
+  justify-content: space-around;
+  flex-flow: row wrap;
+  align-items: stretch;
+`;
+
+const StyledAutocomplete = styled(Autocomplete)`
+  flex-grow: 1 !important;
+`;
+
+const StyledButton = styled(Button)`
+  width: 200px !important;
+`;
 
 export default function SearchForm() {
   const deselectedOptions = [
@@ -114,7 +134,7 @@ export default function SearchForm() {
   const textField = (
     <Autocomplete.TextField
       onChange={updateText}
-      label="Tags"
+      label=""
       value={inputValue}
       prefix={<Icon source={SearchMinor} color="base" />}
       placeholder="Search"
@@ -123,14 +143,20 @@ export default function SearchForm() {
 
   return (
     <div>
-      <Autocomplete
-        options={options}
-        selected={selectedOptions}
-        onSelect={updateSelection}
-        loading={loading}
-        textField={textField}
-      />
-      <button onClick={searchAPI}>Test Search</button>
+      <Layout>
+        <Layout.Section>
+          <StyledAutocomplete
+            options={options}
+            selected={selectedOptions}
+            onSelect={updateSelection}
+            loading={loading}
+            textField={textField}
+          />
+        </Layout.Section>
+        <Layout.Section secondary>
+          <StyledButton onClick={searchAPI}>Search</StyledButton>
+        </Layout.Section>
+      </Layout>
       <Layout>
         <Layout.Section>
           <Card title="Movie Results" sectioned>
@@ -140,12 +166,12 @@ export default function SearchForm() {
                   <List.Item key={movie.imdbID}>
                     {movie.Title}
                     {movie.Year}
-                    <button
+                    <Button
                       onClick={() => addNomination(movie)}
                       disabled={movie.isNominated}
                     >
                       Nominate
-                    </button>
+                    </Button>
                   </List.Item>
                 );
               })}
@@ -162,9 +188,9 @@ export default function SearchForm() {
                       {movieDetails.movie.Title}
                       {movieDetails.movie.Year}
                     </List.Item>
-                    <button onClick={() => removeNomination(movieDetails)}>
+                    <Button onClick={() => removeNomination(movieDetails)}>
                       Unnominate
-                    </button>
+                    </Button>
                   </>
                 );
               })}
